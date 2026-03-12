@@ -32,6 +32,7 @@ class bookmystay {
         app.addRequest("Amit", "Standard");
         app.addRequest("Priya", "Deluxe");
         app.addRequest("Rahul", "Suite");
+        System.out.println("---------------------------------");
 
         app.showRequests();
     }
