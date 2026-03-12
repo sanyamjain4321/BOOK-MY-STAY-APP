@@ -1,95 +1,59 @@
+import java.io.*;
 import java.util.*;
 
-class BookingRequest {
-    String guestName;
-    String roomType;
+class bookmystay {
 
-    BookingRequest(String guestName, String roomType) {
-        this.guestName = guestName;
-        this.roomType = roomType;
-    }
-}
+    static final String FILE_NAME = "inventory.dat";
 
-class BookingProcessor extends Thread {
+    public static void main(String[] args) {
 
-    private Queue<BookingRequest> queue;
-    private Map<String, Integer> inventory;
-    private Map<String, Integer> roomCounter;
+        System.out.println("System Recovery");
 
-    BookingProcessor(Queue<BookingRequest> queue,
-                     Map<String, Integer> inventory,
-                     Map<String, Integer> roomCounter) {
-        this.queue = queue;
-        this.inventory = inventory;
-        this.roomCounter = roomCounter;
-    }
+        Map<String, Integer> inventory = loadInventory();
 
-    public void run() {
-        processBooking();
-    }
-
-    private synchronized void processBooking() {
-
-        if (queue.isEmpty())
-            return;
-
-        BookingRequest request = queue.poll();
-        String type = request.roomType;
-
-        int available = inventory.get(type);
-
-        if (available > 0) {
-
-            int id = roomCounter.get(type) + 1;
-            roomCounter.put(type, id);
-
-            String roomId = type + "-" + id;
-
-            inventory.put(type, available - 1);
-
-            System.out.println("Booking confirmed for Guest: "
-                    + request.guestName + ", Room ID: " + roomId);
-        }
-    }
-}
-
- class bookmystay {
-
-    public static void main(String[] args) throws Exception {
-
-        System.out.println("Concurrent Booking Simulation");
-
-        Queue<BookingRequest> queue = new LinkedList<>();
-
-        queue.add(new BookingRequest("Abhi", "Single"));
-        queue.add(new BookingRequest("Vanmathi", "Double"));
-        queue.add(new BookingRequest("Kural", "Suite"));
-        queue.add(new BookingRequest("Subha", "Single"));
-
-        Map<String, Integer> inventory = new HashMap<>();
-        inventory.put("Single", 5);
-        inventory.put("Double", 3);
-        inventory.put("Suite", 2);
-
-        Map<String, Integer> roomCounter = new HashMap<>();
-        roomCounter.put("Single", 0);
-        roomCounter.put("Double", 0);
-        roomCounter.put("Suite", 0);
-
-        List<Thread> threads = new ArrayList<>();
-
-        for (int i = 0; i < 4; i++) {
-            Thread t = new BookingProcessor(queue, inventory, roomCounter);
-            threads.add(t);
-            t.start();
-        }
-
-        for (Thread t : threads)
-            t.join();
-
-        System.out.println("\nRemaining Inventory:");
+        System.out.println("\nCurrent Inventory:");
         System.out.println("Single: " + inventory.get("Single"));
         System.out.println("Double: " + inventory.get("Double"));
         System.out.println("Suite: " + inventory.get("Suite"));
+
+        saveInventory(inventory);
+
+        System.out.println("Inventory saved successfully.");
+    }
+
+    // Load inventory from file
+    public static Map<String, Integer> loadInventory() {
+
+        Map<String, Integer> inventory = null;
+
+        try {
+            ObjectInputStream in = new ObjectInputStream(new FileInputStream(FILE_NAME));
+            inventory = (Map<String, Integer>) in.readObject();
+            in.close();
+        }
+        catch (Exception e) {
+
+            System.out.println("No valid inventory data found. Starting fresh.");
+
+            inventory = new HashMap<>();
+            inventory.put("Single", 5);
+            inventory.put("Double", 3);
+            inventory.put("Suite", 2);
+        }
+
+        return inventory;
+    }
+
+    // Save inventory to file
+    public static void saveInventory(Map<String, Integer> inventory) {
+
+        try {
+            ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(FILE_NAME));
+            out.writeObject(inventory);
+            out.close();
+        }
+        catch (Exception e) {
+            System.out.println("Error saving inventory.");
+        }
     }
 }
