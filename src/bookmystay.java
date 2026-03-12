@@ -1,58 +1,42 @@
 import java.util.*;
 
-class Reservation {
-    String guestName;
-    String roomId;
-    String roomType;
-
-    Reservation(String guestName, String roomId, String roomType) {
-        this.guestName = guestName;
-        this.roomId = roomId;
-        this.roomType = roomType;
+class InvalidBookingException extends Exception {
+    public InvalidBookingException(String message) {
+        super(message);
     }
 }
 
-class BookingHistory {
+class bookmystay
+{
 
-    private List<Reservation> history = new ArrayList<>();
+    static Set<String> validRoomTypes = new HashSet<>(Arrays.asList("Single", "Double", "Suite"));
 
-    public void addReservation(Reservation r) {
-        history.add(r);
-    }
-
-    public List<Reservation> getReservations() {
-        return history;
-    }
-}
-
-class BookingReportService {
-
-    public static void generateReport(List<Reservation> reservations) {
-
-        System.out.println("Booking History Report");
-
-        for (Reservation r : reservations) {
-            System.out.println("Guest: " + r.guestName +
-                    ", Room ID: " + r.roomId +
-                    ", Room Type: " + r.roomType);
+    public static void validateBooking(String roomType) throws InvalidBookingException {
+        if (!validRoomTypes.contains(roomType)) {
+            throw new InvalidBookingException("Invalid room type selected.");
         }
-
-        System.out.println("Total Bookings: " + reservations.size());
     }
-}
-
-class bookmystay {
 
     public static void main(String[] args) {
 
-        BookingHistory history = new BookingHistory();
+        Scanner sc = new Scanner(System.in);
 
-        // confirmed bookings (simulated)
-        history.addReservation(new Reservation("Abhi", "Single-1", "Single"));
-        history.addReservation(new Reservation("Subha", "Single-2", "Single"));
-        history.addReservation(new Reservation("Vanmathi", "Suite-1", "Suite"));
+        System.out.println("Booking Validation");
 
-        // admin generates report
-        BookingReportService.generateReport(history.getReservations());
+        System.out.print("Enter guest name: ");
+        String guestName = sc.nextLine();
+
+        System.out.print("Enter room type (Single/Double/Suite): ");
+        String roomType = sc.nextLine();
+
+        try {
+            validateBooking(roomType);
+            System.out.println("Booking confirmed for Guest: " + guestName);
+        }
+        catch (InvalidBookingException e) {
+            System.out.println("Booking failed: " + e.getMessage());
+        }
+
+        sc.close();
     }
 }
