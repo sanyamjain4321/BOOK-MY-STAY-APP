@@ -1,63 +1,61 @@
 import java.util.*;
 
-class BookingRequest {
-    String guestName;
-    String roomType;
+class Service {
+    String name;
+    double cost;
 
-    BookingRequest(String guestName, String roomType) {
-        this.guestName = guestName;
-        this.roomType = roomType;
+    Service(String name, double cost) {
+        this.name = name;
+        this.cost = cost;
     }
 }
 
-class bookmystay {
+class AddOnServiceManager {
+
+    Map<String, List<Service>> reservationServices = new HashMap<>();
+
+    public void addService(String reservationId, Service service) {
+
+        reservationServices.putIfAbsent(reservationId, new ArrayList<>());
+        reservationServices.get(reservationId).add(service);
+    }
+
+    public double calculateTotalCost(String reservationId) {
+
+        double total = 0;
+
+        List<Service> services = reservationServices.get(reservationId);
+
+        if (services != null) {
+            for (Service s : services) {
+                total += s.cost;
+            }
+        }
+
+        return total;
+    }
+}
+
+ class bookmystay {
 
     public static void main(String[] args) {
 
-        // Queue for booking requests (FIFO)
-        Queue<BookingRequest> requestQueue = new LinkedList<>();
+        String reservationId = "Single-1";
 
-        requestQueue.add(new BookingRequest("Abhi", "Single"));
-        requestQueue.add(new BookingRequest("Subha", "Single"));
-        requestQueue.add(new BookingRequest("Vanmathi", "Suite"));
+        AddOnServiceManager manager = new AddOnServiceManager();
 
-        // Inventory of rooms
-        Map<String, Integer> inventory = new HashMap<>();
-        inventory.put("Single", 5);
-        inventory.put("Suite", 2);
+        Service spa = new Service("Spa", 1000);
+        Service airportPickup = new Service("Airport Pickup", 500);
 
-        // Map room type to allocated room IDs
-        Map<String, Set<String>> allocatedRooms = new HashMap<>();
-        allocatedRooms.put("Single", new HashSet<>());
-        allocatedRooms.put("Suite", new HashSet<>());
+        manager.addService(reservationId, spa);
+        manager.addService(reservationId, airportPickup);
 
-        System.out.println("Room Allocation Processing");
+        double totalCost = manager.calculateTotalCost(reservationId);
 
-        while (!requestQueue.isEmpty()) {
-
-            BookingRequest request = requestQueue.poll();
-            String roomType = request.roomType;
-
-            if (inventory.get(roomType) > 0) {
-
-                Set<String> roomSet = allocatedRooms.get(roomType);
-
-                // Generate unique room ID
-                String roomId = roomType + "-" + (roomSet.size() + 1);
-
-                // Ensure uniqueness
-                while (roomSet.contains(roomId)) {
-                    roomId = roomType + "-" + (roomSet.size() + 1);
-                }
-
-                roomSet.add(roomId);
-
-                // Update inventory
-                inventory.put(roomType, inventory.get(roomType) - 1);
-
-                System.out.println("Booking confirmed for Guest: "
-                        + request.guestName + ", Room ID: " + roomId);
-            }
-        }
+        System.out.println("+-------------------------------+");
+        System.out.println("| Add-On Service Selection      |");
+        System.out.println("| Reservation ID: " + reservationId +"      |");
+        System.out.println("| Total Add-On Cost: " + totalCost + "     |");
+        System.out.println("+-------------------------------+");
     }
 }
