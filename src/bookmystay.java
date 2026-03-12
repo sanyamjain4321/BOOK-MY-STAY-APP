@@ -1,42 +1,43 @@
 import java.util.*;
 
-class InvalidBookingException extends Exception {
-    public InvalidBookingException(String message) {
-        super(message);
-    }
-}
-
-class bookmystay
-{
-
-    static Set<String> validRoomTypes = new HashSet<>(Arrays.asList("Single", "Double", "Suite"));
-
-    public static void validateBooking(String roomType) throws InvalidBookingException {
-        if (!validRoomTypes.contains(roomType)) {
-            throw new InvalidBookingException("Invalid room type selected.");
-        }
-    }
+class bookmystay {
 
     public static void main(String[] args) {
 
-        Scanner sc = new Scanner(System.in);
+        // Inventory before cancellation
+        Map<String, Integer> inventory = new HashMap<>();
+        inventory.put("Single", 5);
 
-        System.out.println("Booking Validation");
+        // Existing reservation
+        String reservationId = "Single-1";
+        String roomType = "Single";
 
-        System.out.print("Enter guest name: ");
-        String guestName = sc.nextLine();
+        // Stack to track rollback history
+        Stack<String> rollbackStack = new Stack<>();
 
-        System.out.print("Enter room type (Single/Double/Suite): ");
-        String roomType = sc.nextLine();
+        System.out.println("Booking Cancellation");
 
-        try {
-            validateBooking(roomType);
-            System.out.println("Booking confirmed for Guest: " + guestName);
+        // Validate reservation
+        if (reservationId != null && !reservationId.isEmpty()) {
+
+            // Record released room ID
+            rollbackStack.push(reservationId);
+
+            // Restore inventory
+            inventory.put(roomType, inventory.get(roomType) + 1);
+
+            System.out.println("Booking cancelled successfully. Inventory restored for room type: " + roomType);
+
+            System.out.println("\nRollback History (Most Recent First):");
+
+            while (!rollbackStack.isEmpty()) {
+                System.out.println("Released Reservation ID: " + rollbackStack.pop());
+            }
+
+            System.out.println("\nUpdated Single Room Availability: " + inventory.get("Single"));
         }
-        catch (InvalidBookingException e) {
-            System.out.println("Booking failed: " + e.getMessage());
+        else {
+            System.out.println("Cancellation failed. Reservation does not exist.");
         }
-
-        sc.close();
     }
 }
