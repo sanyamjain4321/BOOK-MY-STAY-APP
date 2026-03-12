@@ -1,61 +1,58 @@
 import java.util.*;
 
-class Service {
-    String name;
-    double cost;
+class Reservation {
+    String guestName;
+    String roomId;
+    String roomType;
 
-    Service(String name, double cost) {
-        this.name = name;
-        this.cost = cost;
+    Reservation(String guestName, String roomId, String roomType) {
+        this.guestName = guestName;
+        this.roomId = roomId;
+        this.roomType = roomType;
     }
 }
 
-class AddOnServiceManager {
+class BookingHistory {
 
-    Map<String, List<Service>> reservationServices = new HashMap<>();
+    private List<Reservation> history = new ArrayList<>();
 
-    public void addService(String reservationId, Service service) {
-
-        reservationServices.putIfAbsent(reservationId, new ArrayList<>());
-        reservationServices.get(reservationId).add(service);
+    public void addReservation(Reservation r) {
+        history.add(r);
     }
 
-    public double calculateTotalCost(String reservationId) {
+    public List<Reservation> getReservations() {
+        return history;
+    }
+}
 
-        double total = 0;
+class BookingReportService {
 
-        List<Service> services = reservationServices.get(reservationId);
+    public static void generateReport(List<Reservation> reservations) {
 
-        if (services != null) {
-            for (Service s : services) {
-                total += s.cost;
-            }
+        System.out.println("Booking History Report");
+
+        for (Reservation r : reservations) {
+            System.out.println("Guest: " + r.guestName +
+                    ", Room ID: " + r.roomId +
+                    ", Room Type: " + r.roomType);
         }
 
-        return total;
+        System.out.println("Total Bookings: " + reservations.size());
     }
 }
 
- class bookmystay {
+class bookmystay {
 
     public static void main(String[] args) {
 
-        String reservationId = "Single-1";
+        BookingHistory history = new BookingHistory();
 
-        AddOnServiceManager manager = new AddOnServiceManager();
+        // confirmed bookings (simulated)
+        history.addReservation(new Reservation("Abhi", "Single-1", "Single"));
+        history.addReservation(new Reservation("Subha", "Single-2", "Single"));
+        history.addReservation(new Reservation("Vanmathi", "Suite-1", "Suite"));
 
-        Service spa = new Service("Spa", 1000);
-        Service airportPickup = new Service("Airport Pickup", 500);
-
-        manager.addService(reservationId, spa);
-        manager.addService(reservationId, airportPickup);
-
-        double totalCost = manager.calculateTotalCost(reservationId);
-
-        System.out.println("+-------------------------------+");
-        System.out.println("| Add-On Service Selection      |");
-        System.out.println("| Reservation ID: " + reservationId +"      |");
-        System.out.println("| Total Add-On Cost: " + totalCost + "     |");
-        System.out.println("+-------------------------------+");
+        // admin generates report
+        BookingReportService.generateReport(history.getReservations());
     }
 }
